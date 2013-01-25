@@ -1,5 +1,6 @@
 package com.condorhero89.policescanner;
 
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
 import com.parse.Parse;
@@ -36,6 +38,8 @@ public class MainActivity extends Activity {
     private GoogleMap map;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
+    
+    private HashMap<String, Marker> mapMarkers = new HashMap<String, Marker>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,14 +106,26 @@ public class MainActivity extends Activity {
                     public void done(List<ParseObject> listPoliceData, ParseException e) {
                         if (e == null) {
                             Log.e("Parse", "Retrieved " + listPoliceData.size() + " object(s)");
+                            // TODO
                             for (ParseObject parseObject : listPoliceData) {
                                 LatLng latLng = new LatLng(parseObject.getDouble(KEY_LAT), parseObject.getDouble(KEY_LNG));
-                                Log.e("TEST", "distance = " + Util.distFrom(location.getLatitude(), location.getLongitude(), 
-                                        latLng.latitude, latLng.longitude));
+                                float distance = Util.distFrom(location.getLatitude(), location.getLongitude(), 
+                                        latLng.latitude, latLng.longitude);
+                                Log.e("TEST", "distance = " + distance);
+                                
+                                if (distance < 1000) {
+                                    String address = parseObject.getString(KEY_ADDRESS);
+                                    Marker marker = mapMarkers.get(address);
+                                    marker.remove();
+                                    
+                                    addDangerMarker(latLng, address);
+                                }
                             }
                         } else {
                             Log.e("Parse", "Error: " + e.getMessage());
                         }
+                        
+                        progressDialog.dismiss();
                     }
                 });
             }
@@ -174,10 +190,19 @@ public class MainActivity extends Activity {
     }
     
     private void addMarker(LatLng currentLatLng, String address) {
-        map.addMarker(new MarkerOptions()
+        MarkerOptions markerOptions = new MarkerOptions()
             .position(currentLatLng)
             .title(address)
-            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher));
+        mapMarkers.put(address, map.addMarker(markerOptions));
+    }
+    
+    private void addDangerMarker(LatLng currentLatLng, String address) {
+        MarkerOptions markerOptions = new MarkerOptions()
+            .position(currentLatLng)
+            .title(address)
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.danger));
+        mapMarkers.put(address, map.addMarker(markerOptions));
     }
     
     private void queryAllPoliceData() {

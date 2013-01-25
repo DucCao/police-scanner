@@ -147,7 +147,7 @@ public class MainActivity extends Activity {
     }
 
     private void retrieveCurrentLocationAndReport() {
-        requestLocation("Getting current location...", new OnLocationChangeListener() {
+        requestLocation("F***ing this policeman...", new OnLocationChangeListener() {
             
             @Override
             public void onLocationChanged(Location location) {

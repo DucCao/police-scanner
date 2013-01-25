@@ -6,12 +6,14 @@ import java.util.List;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,6 +47,8 @@ public class MainActivity extends Activity {
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     
+    private TextView txtScanPolice;
+    
     private HashMap<String, Marker> mapMarkers = new HashMap<String, Marker>();
 
     @Override
@@ -53,6 +57,8 @@ public class MainActivity extends Activity {
         Parse.initialize(this, "zIYDZTEWwL8vBrPiqnW0p8dArdjKh3tfjX5dMy7U", "olCWVjSxY1OxooRARGioGHR4R7JXGXQrzUbWfDDL"); 
         
         setContentView(R.layout.activity_main);
+        
+        txtScanPolice = (TextView) findViewById(R.id.txtScanPolice);
         
         getFragmentManager().findFragmentById(R.id.map);
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -103,6 +109,7 @@ public class MainActivity extends Activity {
                             }
                             
                             // update markers state
+                            boolean isSafe = true;
                             for (ParseObject parseObject : listPoliceData) {
                                 LatLng latLng = new LatLng(parseObject.getDouble(KEY_LAT), parseObject.getDouble(KEY_LNG));
                                 float distance = Util.distFrom(location.getLatitude(), location.getLongitude(), 
@@ -115,10 +122,21 @@ public class MainActivity extends Activity {
 //                                    marker.remove();
                                     
                                     addDangerMarker(latLng, address);
+                                    
+                                    isSafe = false;
                                 } else {
                                     addMarker(latLng, address);
                                 }
                             }
+                            
+                            if (isSafe) {
+                                txtScanPolice.setTextColor(Color.BLUE);
+                                txtScanPolice.setText("SAFE");
+                            } else {
+                                txtScanPolice.setTextColor(Color.RED);
+                                txtScanPolice.setText("DANGER");
+                            }
+                            
                         } else {
                             Log.e("Parse", "Error: " + e.getMessage());
                         }

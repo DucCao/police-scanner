@@ -23,4 +23,10 @@ public class PoliceData {
     public String getDescription() {
         return description;
     }
+
+    @Override
+    public String toString() {
+        return "PoliceData [location=" + location + ", address=" + address
+                + ", description=" + description + "]";
+    }
 }

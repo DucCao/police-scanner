@@ -10,5 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+    
+    <Button 
+        android:onClick="reportPolice"
+        android:text="F*** Police"
+        style="@style/cool_button"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"/>
 
 </RelativeLayout>

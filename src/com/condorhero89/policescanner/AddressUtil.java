@@ -29,7 +29,6 @@ public class AddressUtil {
                 return result;
             }
         } catch (IOException e) {
-            e.printStackTrace();
         }
         
         return null;

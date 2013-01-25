@@ -1,12 +1,14 @@
 package com.condorhero89.policescanner;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,6 +29,7 @@ public class MainActivity extends Activity {
     private GoogleMap map;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
+    private PoliceData mPoliceData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +50,24 @@ public class MainActivity extends Activity {
         });
         
         map.setMyLocationEnabled(true);
-        
-        retrieveCurrentLocation();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         
-        Log.i("LocationManager", "removeUpdates");
+        Log.e("LocationManager", "onDestroy: removeUpdates");
         mLocationManager.removeUpdates(mLocationListener);
     }
+    
+    public void reportPolice(View view) {
+        retrieveCurrentLocationAndReport();
+    }
 
-    private void retrieveCurrentLocation() {
+    private void retrieveCurrentLocationAndReport() {
+        final ProgressDialog progressDialog = ProgressDialog.show(this, "", "Getting current location...");
+        progressDialog.show();
+        
         mLocationListener = new LocationListener() {
             
             @Override
@@ -76,6 +84,9 @@ public class MainActivity extends Activity {
             
             @Override
             public void onLocationChanged(Location location) {
+                Log.e("LocationManager", "removeUpdates");
+                mLocationManager.removeUpdates(mLocationListener);
+                
                 Log.i("LocationListener", "onLocationChanged: " + location);
                 LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
@@ -85,17 +96,22 @@ public class MainActivity extends Activity {
 //                      .title("current location")
 //                      .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
                 
-                PoliceData policeReport = new PoliceData(getApplicationContext(), location, "test");
-                reportCurrentLocation(policeReport);
+                mPoliceData = new PoliceData(getApplicationContext(), location, "test");
+                
+                progressDialog.dismiss();
+                
+                reportCurrentLocation(mPoliceData);
             }
         };
         
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, mLocationListener);
     }
     
     private void reportCurrentLocation(PoliceData policeData) {
+        Log.i("MainActivity", "reportCurrentLocation: " + policeData);
+        
         ParseObject locationObject = new ParseObject(LOCATION_OBJECT);
         locationObject.put(KEY_LAT, policeData.getLocation().getLatitude());
         locationObject.put(KEY_LNG, policeData.getLocation().getLongitude());

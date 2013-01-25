@@ -73,6 +73,52 @@ public class MainActivity extends Activity {
     public void reportPolice(View view) {
         retrieveCurrentLocationAndReport();
     }
+    
+    public void scanPolice(View view) {
+        final ProgressDialog progressDialog = ProgressDialog.show(this, "", "Scanning...");
+        progressDialog.show();
+        
+        mLocationListener = new LocationListener() {
+            
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+            
+            @Override
+            public void onProviderEnabled(String provider) {
+            }
+            
+            @Override
+            public void onProviderDisabled(String provider) {
+            }
+            
+            @Override
+            public void onLocationChanged(final Location location) {
+                Log.e("LocationManager", "removeUpdates");
+                mLocationManager.removeUpdates(mLocationListener);
+                
+                ParseQuery query = new ParseQuery(LOCATION_OBJECT);
+                query.findInBackground(new FindCallback() {
+                    public void done(List<ParseObject> listPoliceData, ParseException e) {
+                        if (e == null) {
+                            Log.e("Parse", "Retrieved " + listPoliceData.size() + " object(s)");
+                            for (ParseObject parseObject : listPoliceData) {
+                                LatLng latLng = new LatLng(parseObject.getDouble(KEY_LAT), parseObject.getDouble(KEY_LNG));
+                                Log.e("TEST", "distance = " + Util.distFrom(location.getLatitude(), location.getLongitude(), 
+                                        latLng.latitude, latLng.longitude));
+                            }
+                        } else {
+                            Log.e("Parse", "Error: " + e.getMessage());
+                        }
+                    }
+                });
+            }
+        };
+        
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, mLocationListener);
+    }
 
     private void retrieveCurrentLocationAndReport() {
         final ProgressDialog progressDialog = ProgressDialog.show(this, "", "Getting current location...");

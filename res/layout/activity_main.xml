@@ -12,6 +12,14 @@
         />
     
     <Button 
+        android:onClick="scanPolice"
+        android:text="Scan"
+        style="@style/cool_button"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"/>
+    
+    <Button 
         android:onClick="reportPolice"
         android:text="F*** Police"
         style="@style/cool_button"

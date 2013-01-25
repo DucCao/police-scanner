@@ -33,6 +33,8 @@ public class MainActivity extends Activity {
         public void onLocationChanged(final Location location);
     }
     
+    private static final float MAX_DISTANCE = 1000;
+    
     public static final String LOCATION_OBJECT = "LocationObject";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
@@ -102,7 +104,7 @@ public class MainActivity extends Activity {
                                         latLng.latitude, latLng.longitude);
                                 Log.e("TEST", "distance = " + distance);
                                 
-                                if (distance < 1000) {
+                                if (distance < MAX_DISTANCE) {
                                     String address = parseObject.getString(KEY_ADDRESS);
                                     Marker marker = mapMarkers.get(address);
                                     marker.remove();

@@ -21,10 +21,11 @@ public class MainActivity extends Activity {
     public static final String LOCATION_OBJECT = "LocationObject";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
+    public static final String KEY_ADDRESS = "address";
+    public static final String KEY_DESCRIPTION = "description";
     
     private GoogleMap map;
     private LocationManager mLocationManager;
-    private Location mCurrentLocation;
     private LocationListener mLocationListener;
 
     @Override
@@ -84,7 +85,8 @@ public class MainActivity extends Activity {
 //                      .title("current location")
 //                      .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
                 
-                mCurrentLocation = location;
+                PoliceData policeReport = new PoliceData(getApplicationContext(), location, "test");
+                reportCurrentLocation(policeReport);
             }
         };
         
@@ -93,10 +95,12 @@ public class MainActivity extends Activity {
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
     }
     
-    private void reportCurrentLocation(Location location) {
-        ParseObject locationObject = new ParseObject("LOCATION_OBJECT");
-        locationObject.put(KEY_LAT, location.getLatitude());
-        locationObject.put(KEY_LNG, location.getLongitude());
+    private void reportCurrentLocation(PoliceData policeData) {
+        ParseObject locationObject = new ParseObject(LOCATION_OBJECT);
+        locationObject.put(KEY_LAT, policeData.getLocation().getLatitude());
+        locationObject.put(KEY_LNG, policeData.getLocation().getLongitude());
+        locationObject.put(KEY_ADDRESS, policeData.getAddress());
+        locationObject.put(KEY_DESCRIPTION, policeData.getDescription());
         locationObject.saveInBackground();
     }
 }

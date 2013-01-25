@@ -18,8 +18,10 @@ import com.parse.Parse;
 import com.parse.ParseObject;
 
 public class MainActivity extends Activity {
-    static final LatLng HAMBURG = new LatLng(53.558, 9.927);
-    static final LatLng KIEL = new LatLng(53.551, 9.993);
+    public static final String LOCATION_OBJECT = "LocationObject";
+    public static final String KEY_LAT = "lat";
+    public static final String KEY_LNG = "lng";
+    
     private GoogleMap map;
     private LocationManager mLocationManager;
     private Location mCurrentLocation;
@@ -46,10 +48,6 @@ public class MainActivity extends Activity {
         map.setMyLocationEnabled(true);
         
         retrieveCurrentLocation();
-        
-        ParseObject testObject = new ParseObject("TestObject");
-        testObject.put("foo", "bar");
-        testObject.saveInBackground();
     }
 
     @Override
@@ -93,5 +91,12 @@ public class MainActivity extends Activity {
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
+    }
+    
+    private void reportCurrentLocation(Location location) {
+        ParseObject locationObject = new ParseObject("LOCATION_OBJECT");
+        locationObject.put(KEY_LAT, location.getLatitude());
+        locationObject.put(KEY_LNG, location.getLongitude());
+        locationObject.saveInBackground();
     }
 }

@@ -92,8 +92,7 @@ public class MainActivity extends Activity {
                 Log.e("LocationManager", "removeUpdates");
                 mLocationManager.removeUpdates(mLocationListener);
                 
-                ParseQuery query = new ParseQuery(LOCATION_OBJECT);
-                query.findInBackground(new FindCallback() {
+                queryAllPoliceData("Scanning...", new FindCallback() {
                     public void done(List<ParseObject> listPoliceData, ParseException e) {
                         if (e == null) {
                             Log.e("Parse", "Retrieved " + listPoliceData.size() + " object(s)");
@@ -199,9 +198,21 @@ public class MainActivity extends Activity {
         mapMarkers.put(address, map.addMarker(markerOptions));
     }
     
-    private void queryAllPoliceData() {
+    private void queryAllPoliceData(String message, final FindCallback findCallback) {
+        final ProgressDialog progressDialog = ProgressDialog.show(MainActivity.this, "", message);
+        progressDialog.show();
+        
         ParseQuery query = new ParseQuery(LOCATION_OBJECT);
         query.findInBackground(new FindCallback() {
+            public void done(List<ParseObject> listPoliceData, ParseException e) {
+                findCallback.done(listPoliceData, e);
+                progressDialog.dismiss();
+            }
+        });
+    }
+    
+    private void queryAllPoliceData() {
+        queryAllPoliceData("Loading...", new FindCallback() {
             public void done(List<ParseObject> listPoliceData, ParseException e) {
                 if (e == null) {
                     Log.d("Parse", "Retrieved " + listPoliceData.size() + " object(s)");

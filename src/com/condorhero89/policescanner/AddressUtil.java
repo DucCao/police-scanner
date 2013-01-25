@@ -23,7 +23,7 @@ public class AddressUtil {
                 int numOfAddressLine = address.getMaxAddressLineIndex();
                 String result = "";
                 for (int i = 0; i < numOfAddressLine; ++i) {
-                    result += address.getAddressLine(i);
+                    result += address.getAddressLine(i) + " ";
                 }
                 
                 return result;

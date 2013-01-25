@@ -1,5 +1,7 @@
 package com.condorhero89.policescanner;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -18,8 +20,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.FindCallback;
 import com.parse.Parse;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 public class MainActivity extends Activity {
     public static final String LOCATION_OBJECT = "LocationObject";
@@ -31,7 +36,6 @@ public class MainActivity extends Activity {
     private GoogleMap map;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
-    private PoliceData mPoliceData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,8 @@ public class MainActivity extends Activity {
         });
         
         map.setMyLocationEnabled(true);
+        
+        queryAllPoliceData();
     }
 
     @Override
@@ -95,12 +101,9 @@ public class MainActivity extends Activity {
                 LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
                 
-                mPoliceData = new PoliceData(getApplicationContext(), location, "test");
+                PoliceData mPoliceData = new PoliceData(getApplicationContext(), location, "test");
                 
-                map.addMarker(new MarkerOptions()
-                    .position(currentLatLng)
-                    .title(mPoliceData.getAddress())
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+                addMarker(currentLatLng, mPoliceData.getAddress());
                 
                 progressDialog.dismiss();
                 
@@ -122,5 +125,30 @@ public class MainActivity extends Activity {
         locationObject.put(KEY_ADDRESS, policeData.getAddress());
         locationObject.put(KEY_DESCRIPTION, policeData.getDescription());
         locationObject.saveInBackground();
+    }
+    
+    private void addMarker(LatLng currentLatLng, String address) {
+        map.addMarker(new MarkerOptions()
+            .position(currentLatLng)
+            .title(address)
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+    }
+    
+    private void queryAllPoliceData() {
+        ParseQuery query = new ParseQuery(LOCATION_OBJECT);
+        query.findInBackground(new FindCallback() {
+            public void done(List<ParseObject> listPoliceData, ParseException e) {
+                if (e == null) {
+                    Log.d("Parse", "Retrieved " + listPoliceData.size() + " object(s)");
+                    for (ParseObject parseObject : listPoliceData) {
+                        LatLng latLng = new LatLng(parseObject.getDouble(KEY_LAT), parseObject.getDouble(KEY_LNG));
+                        String address = parseObject.getString(KEY_ADDRESS);
+                        addMarker(latLng, address);
+                    }
+                } else {
+                    Log.e("Parse", "Error: " + e.getMessage());
+                }
+            }
+        });
     }
 }

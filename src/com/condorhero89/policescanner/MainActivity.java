@@ -14,8 +14,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.Parse;
 import com.parse.ParseObject;
 
@@ -57,7 +59,9 @@ public class MainActivity extends Activity {
         super.onDestroy();
         
         Log.e("LocationManager", "onDestroy: removeUpdates");
-        mLocationManager.removeUpdates(mLocationListener);
+        if (mLocationListener != null) {
+            mLocationManager.removeUpdates(mLocationListener);
+        }
     }
     
     public void reportPolice(View view) {
@@ -91,12 +95,12 @@ public class MainActivity extends Activity {
                 LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
                 
-//                map.addMarker(new MarkerOptions()
-//                      .position(currentLatLng)
-//                      .title("current location")
-//                      .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
-                
                 mPoliceData = new PoliceData(getApplicationContext(), location, "test");
+                
+                map.addMarker(new MarkerOptions()
+                    .position(currentLatLng)
+                    .title(mPoliceData.getAddress())
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
                 
                 progressDialog.dismiss();
                 

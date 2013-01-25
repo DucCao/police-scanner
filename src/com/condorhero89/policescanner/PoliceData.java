@@ -18,7 +18,7 @@ public class PoliceData {
         return location;
     }
     public String getAddress() {
-        return address;
+        return address != null ? address : "";
     }
     public String getDescription() {
         return description;

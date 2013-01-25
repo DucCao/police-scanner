@@ -29,6 +29,10 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 public class MainActivity extends Activity {
+    public interface OnLocationChangeListener {
+        public void onLocationChanged(final Location location);
+    }
+    
     public static final String LOCATION_OBJECT = "LocationObject";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
@@ -79,22 +83,7 @@ public class MainActivity extends Activity {
     }
     
     public void scanPolice(View view) {
-        final ProgressDialog progressDialog = ProgressDialog.show(this, "", "Scanning...");
-        progressDialog.show();
-        
-        mLocationListener = new LocationListener() {
-            
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-            
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
-            
-            @Override
-            public void onProviderDisabled(String provider) {
-            }
+        requestLocation("Scanning...", new OnLocationChangeListener() {
             
             @Override
             public void onLocationChanged(final Location location) {
@@ -124,20 +113,35 @@ public class MainActivity extends Activity {
                         } else {
                             Log.e("Parse", "Error: " + e.getMessage());
                         }
-                        
-                        progressDialog.dismiss();
                     }
                 });
             }
-        };
-        
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, mLocationListener);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 30000, 0, mLocationListener);
+        });
     }
 
     private void retrieveCurrentLocationAndReport() {
-        final ProgressDialog progressDialog = ProgressDialog.show(this, "", "Getting current location...");
+        requestLocation("Getting current location...", new OnLocationChangeListener() {
+            
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.e("LocationManager", "removeUpdates");
+                mLocationManager.removeUpdates(mLocationListener);
+                
+                Log.i("LocationListener", "onLocationChanged: " + location);
+                LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                
+                PoliceData mPoliceData = new PoliceData(getApplicationContext(), location, "test");
+                
+                addMarker(currentLatLng, mPoliceData.getAddress());
+                
+                reportCurrentLocation(mPoliceData);
+            }
+        });
+    }
+    
+    private void requestLocation(String message, final OnLocationChangeListener listener) {
+        final ProgressDialog progressDialog = ProgressDialog.show(this, "", message);
         progressDialog.show();
         
         mLocationListener = new LocationListener() {
@@ -156,20 +160,8 @@ public class MainActivity extends Activity {
             
             @Override
             public void onLocationChanged(Location location) {
-                Log.e("LocationManager", "removeUpdates");
-                mLocationManager.removeUpdates(mLocationListener);
-                
-                Log.i("LocationListener", "onLocationChanged: " + location);
-                LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                
-                PoliceData mPoliceData = new PoliceData(getApplicationContext(), location, "test");
-                
-                addMarker(currentLatLng, mPoliceData.getAddress());
-                
+                listener.onLocationChanged(location);
                 progressDialog.dismiss();
-                
-                reportCurrentLocation(mPoliceData);
             }
         };
         

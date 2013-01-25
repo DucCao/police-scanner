@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
             
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                Log.i("OnCameraChangeListener", "onCameraChange: " + cameraPosition);
+//                Log.i("OnCameraChangeListener", "onCameraChange: " + cameraPosition);
             }
         });
         
@@ -96,19 +96,27 @@ public class MainActivity extends Activity {
                     public void done(List<ParseObject> listPoliceData, ParseException e) {
                         if (e == null) {
                             Log.e("Parse", "Retrieved " + listPoliceData.size() + " object(s)");
-                            // TODO
+                            
+                            // clear all markers first
+                            for (Marker marker : mapMarkers.values()) {
+                                marker.remove();
+                            }
+                            
+                            // update markers state
                             for (ParseObject parseObject : listPoliceData) {
                                 LatLng latLng = new LatLng(parseObject.getDouble(KEY_LAT), parseObject.getDouble(KEY_LNG));
                                 float distance = Util.distFrom(location.getLatitude(), location.getLongitude(), 
                                         latLng.latitude, latLng.longitude);
                                 Log.e("TEST", "distance = " + distance);
                                 
+                                String address = parseObject.getString(KEY_ADDRESS);
                                 if (distance < MAX_DISTANCE) {
-                                    String address = parseObject.getString(KEY_ADDRESS);
-                                    Marker marker = mapMarkers.get(address);
-                                    marker.remove();
+//                                    Marker marker = mapMarkers.get(address);
+//                                    marker.remove();
                                     
                                     addDangerMarker(latLng, address);
+                                } else {
+                                    addMarker(latLng, address);
                                 }
                             }
                         } else {

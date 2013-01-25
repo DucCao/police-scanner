@@ -41,6 +41,8 @@ public class MainActivity extends Activity {
             }
         });
         
+        map.setMyLocationEnabled(true);
+        
         retrieveCurrentLocation();
     }
 
@@ -73,10 +75,10 @@ public class MainActivity extends Activity {
                 LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
                 
-                map.addMarker(new MarkerOptions()
-                      .position(currentLatLng)
-                      .title("current location")
-                      .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+//                map.addMarker(new MarkerOptions()
+//                      .position(currentLatLng)
+//                      .title("current location")
+//                      .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
                 
                 mCurrentLocation = location;
             }
